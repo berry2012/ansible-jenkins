@@ -1,0 +1,7 @@
+localhost
+
+[centosvms]
+centos-ansible[2:3]
+
+[ubuntuvms]
+ubuntu-ansible[4:5]
