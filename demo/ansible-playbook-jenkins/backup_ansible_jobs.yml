@@ -1,0 +1,54 @@
+# Backup Demonstration with Ansible Playbook and Jenkins Pipeline
+- name: Backup Ansible Playbook Jobs
+  hosts: localhost
+  become: true
+  become_user: root
+  gather_facts: no
+
+
+  vars:
+    ansible_location: "/home/ansible/*"
+
+  tasks:
+
+    - name: Assert that all mandatory variables are defined
+      assert:
+        that:
+          - "{{ item }} is defined"
+          - "{{ item }} | trim | length > 0"
+        fail_msg: "Variable '{{ item }}' is not defined."
+      loop:
+        - admin_id
+        - ansible_backup_release_version
+
+    - name: Initialise Variables
+      set_fact:
+        archive_name: "{{ admin_id }}_{{ ansible_backup_release_version }}.tar.gz"
+
+    - name: Clean up deployment tmp directory if it does exist
+      file:
+        path: "/tmp/{{admin_id}}"
+        state: absent
+      become_user: root
+
+    - name: Create tmp directory to store archive if it doesn't exist
+      file:
+        path: "/tmp/{{admin_id}}"
+        state: directory
+        mode: '0777'
+
+    - name: Compress Edp Backup directory and store temporarily for Genie-Main
+      archive:
+        path:
+        - "{{ ansible_location }}"
+        dest: "/tmp/{{admin_id}}/{{ archive_name }}"
+        format: gz
+        force_archive: true
+        mode: '0777'
+
+    - name: Copy archive to temporary location
+      copy:
+        src: "/tmp/{{ admin_id }}/{{ archive_name }}"
+        dest: "/tmp/{{admin_id}}"
+        mode: '0777'
+
