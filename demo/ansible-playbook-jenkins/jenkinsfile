@@ -1,0 +1,50 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Author') {
+            steps {
+                sh returnStdout: true, script: 'echo \'This pipeline is executed by\' ${admin_id}'
+            }
+        }          
+        
+        stage('Checkout Code') {
+            steps {
+                git 'https://github.com/berry2012/ansible-jenkins'
+            }
+        }
+        
+        stage('Pre Build') {
+            steps {
+                sh '''
+                    echo "=====Multiline shell steps ====="
+                    ls -lah $(pwd)
+                    java -version
+                    if [ $? -eq 0 ]; then
+                      echo "Java installed" 
+                    else
+                      echo "Java not installed" 
+                      sudo apt install default-jre -y
+                    fi
+                '''  
+            }
+        }           
+        stage('Build: Ansible-Playbook') {
+            steps {
+                ansiblePlaybook colorized: true, credentialsId: 'ansible_user', disableHostKeyChecking: true, extras: '-e admin_id=${admin_id} -e ansible_backup_release_version=${ansible_backup_release_version}', installation: 'ansible', inventory: 'demo/ansible-playbook-jenkins/inv', playbook: 'demo/ansible-playbook-jenkins/backup_ansible_jobs.yml'
+            }
+        }
+      
+        stage('Post Build') {
+            steps {
+                sh '''
+                    echo "Pipeline executed successfully"
+                    echo "Hostname : $(hostname)"
+                    echo "This pipeline was executed by" ${admin_id} on $(date)
+                '''        
+
+            }
+        }        
+
+    }
+}
