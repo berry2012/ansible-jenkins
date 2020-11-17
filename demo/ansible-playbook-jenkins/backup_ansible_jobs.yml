@@ -46,9 +46,3 @@
         force_archive: true
         mode: '0777'
 
-    - name: Copy archive to temporary location
-      copy:
-        src: "/tmp/{{ admin_id }}/{{ archive_name }}"
-        dest: "/tmp/{{admin_id}}"
-        mode: '0777'
-
