@@ -4,17 +4,17 @@ pipeline {
     stages {
         stage('Author') {
             steps {
-                echo 'This pipeline is executed by ${admin_id}'
+                sh returnStdout: true, script: 'echo \'This pipeline is executed by\' ${admin_id}'
             }
         }          
         
-        stage('Source: Checkout Code') {
+        stage('Checkout Code') {
             steps {
                 git 'https://github.com/berry2012/ansible-jenkins'
             }
         }
         
-        stage('Pre Build: Display Content') {
+        stage('Pre Build') {
             steps {
                 sh '''
                     echo "=====Multiline shell steps ====="
@@ -29,9 +29,9 @@ pipeline {
                 '''  
             }
         }           
-        stage('Build: Execute Ansible-Playbook') {
+        stage('Build: Ansible-Playbook') {
             steps {
-                ansiblePlaybook colorized: true, credentialsId: 'ansible_user', disableHostKeyChecking: true, extras: '-e admin_id=${admin_id}, -e ansible_backup_release_version=${ansible_backup_release_version}', installation: 'ansible', inventory: 'demo/ansible-playbook-jenkins/inv', playbook: 'demo/ansible-playbook-jenkins/backup_ansible_jobs.yml'
+                ansiblePlaybook colorized: true, credentialsId: 'ansible_user', disableHostKeyChecking: true, extras: '-e admin_id=${admin_id} -e ansible_backup_release_version=${ansible_backup_release_version}', installation: 'ansible', inventory: 'demo/ansible-playbook-jenkins/inv', playbook: 'demo/ansible-playbook-jenkins/backup_ansible_jobs.yml'
             }
         }
       
@@ -40,12 +40,11 @@ pipeline {
                 sh '''
                     echo "Pipeline executed successfully"
                     echo "Hostname : $(hostname)"
-                    date
+                    echo "This pipeline was executed by" ${admin_id} on $(date)
                 '''        
 
             }
         }        
-        
 
     }
 }
