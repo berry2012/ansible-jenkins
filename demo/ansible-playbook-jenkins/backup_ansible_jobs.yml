@@ -37,7 +37,7 @@
         state: directory
         mode: '0777'
 
-    - name: Compress Edp Backup directory and store temporarily for Genie-Main
+    - name: Compress Ansible Backup directory and store temporarily 
       archive:
         path:
         - "{{ ansible_location }}"
